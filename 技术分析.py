@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import talib
-from backtest import Strategy, Portfolio, getSymbol, Bars, MarketClosePortfolio ,Performance
+from backtest import Strategy, Portfolio, getSymbol, Bars, MarketOpenPortfolio ,Performance
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -23,10 +23,8 @@ class MAStrategy(Strategy):
     
     def generate_signals(self):
         Cc = self.bars_close
-        C = pd.DataFrame()
-        C[self.symbol[0]] = Cc
-        signals = pd.DataFrame(columns = self.symbol,index = C.index)
-        signals[self.symbol[0]] = np.where(pd.rolling_mean(C[self.symbol[0]],self.short)>pd.rolling_mean(C[self.symbol[0]],self.long),1,0)
+        signals = pd.DataFrame(columns = self.symbol,index = Cc.index)
+        signals[self.symbol[0]] = np.where(pd.rolling_mean(Cc[self.symbol[0]],self.short)>pd.rolling_mean(Cc[self.symbol[0]],self.long),1,0)
         return signals
         
 class MACD1Strategy(Strategy):
@@ -40,10 +38,8 @@ class MACD1Strategy(Strategy):
         
     def MACD(self):
         Cc = self.bars_close
-        C = pd.DataFrame()
         MD = pd.DataFrame(index = Cc.index)
-        C[self.symbol[0]] = Cc
-        macd_line,signal_line,hist = talib.MACD(C[self.symbol[0]].values,self.fastp,self.slowp,self.signalp)
+        macd_line,signal_line,hist = talib.MACD(Cc[self.symbol[0]].values,self.fastp,self.slowp,self.signalp)
         MD["macd_line"] = macd_line
         MD["signal_line"] = signal_line
         MD['hist'] = hist
@@ -66,10 +62,8 @@ class MACD2Strategy(Strategy):
         
     def MACD(self):
         Cc = self.bars_close
-        C = pd.DataFrame()
         MD = pd.DataFrame(index = Cc.index)
-        C[self.symbol[0]] = Cc
-        macd_line,signal_line,hist = talib.MACD(C[self.symbol[0]].values,self.fastp,self.slowp,self.signalp)
+        macd_line,signal_line,hist = talib.MACD(Cc[self.symbol[0]].values,self.fastp,self.slowp,self.signalp)
         MD["macd_line"] = macd_line
         MD["signal_line"] = signal_line
         MD['hist'] = hist
@@ -122,11 +116,22 @@ if __name__ == "__main__":
 #    C = Bars(symbol).close(start='2006-01-01')
     
     bars = getSymbol(symbol[0]).adj_history()
-    O = Bars(symbol).Open(start='2000-01-01')
-    H = bars["high"]
-    L = bars["low"]
-    C = bars["close"]  
-    P_MA = Performance(MarketClosePortfolio(MAStrategy(symbol,C),O),"QQQ")
-    P_MACD12269_HIST = Performance(MarketClosePortfolio(MACD1Strategy(symbol,C,12,26,9),O),"QQQ")
-    P_MACD5355_HIST = Performance(MarketClosePortfolio(MACD1Strategy(symbol,C,5,35,5),O),"QQQ")       
-    P_KD = Performance(MarketClosePortfolio(STOCHStrategy(symbol,H,L,C,fastkp = 9,slowkp = 3,slowdp = 3),O),"QQQ")
+    O = pd.DataFrame()
+    H = pd.DataFrame()
+    L = pd.DataFrame()
+    C = pd.DataFrame()
+    V = pd.DataFrame()    
+    O[symbol[0]] = bars["open"]
+    H[symbol[0]] = bars["high"]
+    L[symbol[0]] = bars["low"]
+    C[symbol[0]] = bars["close"]
+    V[symbol[0]] = bars["volume"]
+    
+    P_MA = Performance(MarketOpenPortfolio(MAStrategy(symbol,C),O),"QQQ")
+    P_MACD12269_HIST = Performance(MarketOpenPortfolio(MACD1Strategy(symbol,C,12,26,9),O),"QQQ")
+    P_MACD5355_HIST = Performance(MarketOpenPortfolio(MACD1Strategy(symbol,C,5,35,5),O),"QQQ")       
+    P_KD = Performance(MarketOpenPortfolio(STOCHStrategy(symbol,H,L,C,fastkp = 9,slowkp = 3,slowdp = 3),O),"QQQ")
+    P_MA.sim_summary()
+    P_MACD12269_HIST.sim_summary()
+    P_MACD5355_HIST.sim_summary()
+    P_KD.sim_summary()

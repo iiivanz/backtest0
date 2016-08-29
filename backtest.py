@@ -125,6 +125,31 @@ class Bars(object):
         bars_volume = bar.dropna()  
         return bars_volume
         
+class MarketOpenPortfolio(Portfolio):
+    
+    def __init__(self, Strategy, bars_bid):
+        self.symbol = Strategy.symbol        
+        self.bars_bid = bars_bid
+        self.signals = Strategy.generate_signals()
+        self.positions = self.generate_positions()
+
+    def generate_positions(self):
+        positions = pd.DataFrame(index=self.signals.index).fillna(0.0)
+        positions = self.signals
+        return positions    
+              
+    def backtest_portfolio(self):        
+        bid = self.bars_bid
+        bars_returns = pd.DataFrame(index = bid.index)
+        bars_returns = bid / bid.shift(1) - 1
+        bars_returns = (self.positions.shift(1) * bars_returns.shift(-1))
+        portfolio = pd.DataFrame()
+        portfolio = bars_returns
+        portfolio['holdings'] = ((bars_returns).sum(axis = 1) + 1).cumprod()
+        portfolio['holdings'][0] = 1
+        return portfolio
+        
+        
 class MarketClosePortfolio(Portfolio):
     
     def __init__(self, Strategy, bars_bid):
@@ -148,6 +173,7 @@ class MarketClosePortfolio(Portfolio):
         portfolio['holdings'] = ((bars_returns).sum(axis = 1) + 1).cumprod()
         portfolio['holdings'][0] = 1
         return portfolio
+        
         
 class Performance(object):
     
