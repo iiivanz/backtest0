@@ -35,16 +35,38 @@ class VWAPStrategy(Strategy):
         signals = pd.DataFrame(columns = self.symbol,index = VWAP.index)
         signals[self.symbol[0]] = np.where(VWAP[self.symbol[0]]>self.up_line ,1,0)
         return signals  
+        
+class CHANNELStrategy(Strategy):
+    
+    def __init__(self, symbol, bars_close, look_back = 30):
+        self.symbol = symbol   	
+        self.bars_close = bars_close
+        self.look_back = look_back
+        
+    def CHANNEL(self):
+        Cc = self.bars_close
+        CHANNEL = pd.DataFrame(index = Cc.index)
+        CHANNEL[self.symbol[0]] = Cc
+        CHANNEL["max"] = pd.rolling_max(Cc,self.look_back)
+        CHANNEL["min"] = pd.rolling_min(Cc,self.look_back)
+        CHANNEL["mean"] = (CHANNEL["min"] + CHANNEL["max"])/2
+        return CHANNEL    
+                
+    def generate_signals(self):
+        CHANNEL = self.CHANNEL()
+        signals = pd.DataFrame(columns = self.symbol,index = CHANNEL.index)
+        signals[self.symbol[0]] = np.where(CHANNEL[self.symbol[0]]>CHANNEL["mean"] ,1,0)
+        return signals 
     
 if __name__ == "__main__":
-    symbol = ["SPY"]
+    symbol = ["^HSI"]
     
 #    O = Bars(symbol).Open(start='2006-01-01')
 #    H = Bars(symbol).high(start='2006-01-01')
 #    L = Bars(symbol).low(start='2006-01-01')
 #    C = Bars(symbol).close(start='2006-01-01')
     
-    bars = getSymbol(symbol[0]).adj_history()
+    bars = getSymbol(symbol[0]).adj_history(start="2012-01-01",end="2016-08-25")
     O = pd.DataFrame()
     H = pd.DataFrame()
     L = pd.DataFrame()
@@ -57,5 +79,5 @@ if __name__ == "__main__":
     C[symbol[0]] = bars["close"]
     V[symbol[0]] = bars["volume"]
     
-    
-    P_VWAP = Performance(MarketClosePortfolio(VWAPStrategy(symbol,C,V),C),"SPY")
+    P_C = Performance(MarketClosePortfolio(CHANNELStrategy(symbol,C),C),"^HSI")
+    P_VWAP = Performance(MarketClosePortfolio(VWAPStrategy(symbol,C,V),C),"^HSI")
