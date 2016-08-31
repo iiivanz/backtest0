@@ -59,7 +59,7 @@ class CHANNELStrategy(Strategy):
         return signals 
     
 if __name__ == "__main__":
-    symbol = ["^HSI"]
+    symbol = ["SPY"]
     
 #    O = Bars(symbol).Open(start='2006-01-01')
 #    H = Bars(symbol).high(start='2006-01-01')
@@ -79,5 +79,5 @@ if __name__ == "__main__":
     C[symbol[0]] = bars["close"]
     V[symbol[0]] = bars["volume"]
     
-    P_C = Performance(MarketClosePortfolio(CHANNELStrategy(symbol,C),C),"^HSI")
-    P_VWAP = Performance(MarketClosePortfolio(VWAPStrategy(symbol,C,V),C),"^HSI")
+    P_C = Performance(MarketClosePortfolio(CHANNELStrategy(symbol,C),O),"SPY")
+    P_VWAP = Performance(MarketClosePortfolio(VWAPStrategy(symbol,C,V),O),"SPY")

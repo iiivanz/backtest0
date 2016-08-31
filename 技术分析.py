@@ -13,6 +13,9 @@ from backtest import Strategy, Portfolio, getSymbol, Bars, MarketOpenPortfolio ,
 import warnings
 warnings.filterwarnings("ignore")
 
+
+
+
 class MAStrategy(Strategy):
     
     def __init__(self, symbol, bars_close, long = 24,short = 12):
@@ -94,7 +97,7 @@ class STOCHStrategy(Strategy):
         fk = self.fastkp
         sk = self.slowkp
         sd = self.slowdp
-        slowk,slowd = talib.STOCH(H.values,L.values,C.values,fastk_period=fk,slowk_period=sk,slowd_period=sd)
+        slowk,slowd = talib.STOCH(H[symbol[0]].values,L[symbol[0]].values,C[symbol[0]].values,fastk_period=fk,slowk_period=sk,slowd_period=sd)
         return slowk,slowd
         
     def generate_signals(self):
@@ -108,14 +111,14 @@ class STOCHStrategy(Strategy):
     
     
 if __name__ == "__main__":
-    symbol = ["QQQ"]
+    symbol = ["SPY"]
     
 #    O = Bars(symbol).Open(start='2006-01-01')
 #    H = Bars(symbol).high(start='2006-01-01')
 #    L = Bars(symbol).low(start='2006-01-01')
 #    C = Bars(symbol).close(start='2006-01-01')
     
-    bars = getSymbol(symbol[0]).adj_history()
+    bars = getSymbol(symbol[0]).adj_history(start="2005-01-01")
     O = pd.DataFrame()
     H = pd.DataFrame()
     L = pd.DataFrame()
@@ -126,12 +129,6 @@ if __name__ == "__main__":
     L[symbol[0]] = bars["low"]
     C[symbol[0]] = bars["close"]
     V[symbol[0]] = bars["volume"]
-    
-    P_MA = Performance(MarketOpenPortfolio(MAStrategy(symbol,C),O),"QQQ")
-    P_MACD12269_HIST = Performance(MarketOpenPortfolio(MACD1Strategy(symbol,C,12,26,9),O),"QQQ")
-    P_MACD5355_HIST = Performance(MarketOpenPortfolio(MACD1Strategy(symbol,C,5,35,5),O),"QQQ")       
-    P_KD = Performance(MarketOpenPortfolio(STOCHStrategy(symbol,H,L,C,fastkp = 9,slowkp = 3,slowdp = 3),O),"QQQ")
-    P_MA.sim_summary()
-    P_MACD12269_HIST.sim_summary()
-    P_MACD5355_HIST.sim_summary()
+         
+    P_KD = Performance(MarketOpenPortfolio(STOCHStrategy(symbol,H,L,C,fastkp = 9,slowkp = 3,slowdp = 3),O),"SPY")
     P_KD.sim_summary()

@@ -294,7 +294,5 @@ class Performance(object):
         S["total_return"] = (sim["P&L"]+1).prod() - 1
         S["trade_frequency"] = len(sim.index)
         S["win_rate"] = len(sim[sim["P&L"]>com].index) / len(sim.index)
-#        S["average_hold"] = sim["holding_days"].mean()
-        S["return_per_trade"] = sim["P&L"].mean()
-        S["risk_per_trade"] = sim["P&L"].std()
+#        S["average_hold"] = 
         return S
