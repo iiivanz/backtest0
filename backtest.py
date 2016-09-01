@@ -288,11 +288,11 @@ class Performance(object):
         sim.index = range(len(sim.index))
         return sim
         
-    def sim_summary(self,com = 0):
+    def sim_summary(self,com = 0.003):
         sim = self.sim()
         S = pd.Series()
-        S["total_return"] = (sim["P&L"]+1).prod() - 1
+        S["total_return"] = (sim["P&L"]+1-com).prod() - 1
         S["trade_frequency"] = len(sim.index)
         S["win_rate"] = len(sim[sim["P&L"]>com].index) / len(sim.index)
-#        S["average_hold"] = 
+        S["average_hold"] = (sim["holding_days"]/np.timedelta64(1,"D")).mean()
         return S

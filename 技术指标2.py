@@ -60,6 +60,37 @@ class BBANDSStrategy(Strategy):
         signals = signals.fillna(0)
         return signals
         
+class RSIMAStrategy(Strategy):
+    
+    def __init__(self, symbol, bars_close, look_back = 14,up_line = 70,low_line = 30,ma_look_back=200):
+        self.symbol = symbol   	
+        self.bars_close = bars_close
+        self.look_back = look_back
+        self.up_line = up_line
+        self.low_line = low_line
+        self.ma_look_back = ma_look_back
+        
+    def RSI(self):
+        Cc = self.bars_close
+        RSI = pd.DataFrame(index = Cc.index)
+        RSI[self.symbol[0]] = talib.RSI(Cc[self.symbol[0]].values,self.look_back)
+        return RSI
+    
+    def MA(self):
+        Cc = self.bars_close
+        MA = pd.DataFrame(index = Cc.index)
+        MA[self.symbol[0]] = pd.rolling_mean(Cc,self.ma_look_back)
+        return MA
+    
+    def generate_signals(self):
+        RSI = self.RSI()
+        MA = self.MA()
+        signals = pd.DataFrame(columns = self.symbol,index = RSI.index)
+        signals[self.symbol[0]] = np.where(MA[self.symbol[0]]<self.bars_close[symbol[0]],np.where(RSI[self.symbol[0]]<self.low_line,1,np.where(RSI[self.symbol[0]]>self.up_line,0,np.nan)),0)
+        signals = signals.fillna(method = "ffill")
+        signals = signals.fillna(0)
+        return signals
+        
     
 if __name__ == "__main__":
     symbol = ["SPY"]    
@@ -78,6 +109,5 @@ if __name__ == "__main__":
     L[symbol[0]] = bars["low"]
     C[symbol[0]] = bars["close"]
     V[symbol[0]] = bars["volume"]
-    
+    PPP  = Performance(MarketOpenPortfolio(RSIMAStrategy(symbol,C),O),"SPY")
     P_RSI = Performance(MarketOpenPortfolio(RSIStrategy(symbol,C),O),"SPY")
-    P_BBANDS = Performance(MarketOpenPortfolio(BBANDSStrategy(symbol,C),O),"SPY")
