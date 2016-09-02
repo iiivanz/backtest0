@@ -288,7 +288,7 @@ class Performance(object):
         sim.index = range(len(sim.index))
         return sim
         
-    def sim_summary(self,com = 0.003):
+    def sim_summary(self,com = 0.0003):
         sim = self.sim()
         S = pd.Series()
         S["total_return"] = (sim["P&L"]+1-com).prod() - 1
