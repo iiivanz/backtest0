@@ -71,6 +71,7 @@ class getSymbol(object):
         B['low'] = A['Adj Low']
         B['close'] = A['Adj Close']
         B['volume'] = A['Volume']
+        B.index = pd.to_datetime(B.index)
         return B
         
     def history(self,start = '2000-01-01',end = today):
@@ -83,6 +84,7 @@ class getSymbol(object):
         B['close'] = A['Close']
         B['volume'] = A['Volume']
         B["adj_close"] = A["Adj Close"]
+        B.index = pd.to_datetime(B.index)
         return B   
 
 class Bars(object):
@@ -94,28 +96,32 @@ class Bars(object):
         bar = pd.DataFrame()
         for x in self.symbol:
             bar[x] = getSymbol(x).adj_history(start = start,end = today)['open']
-        bars_open = bar.dropna()  
+        bars_open = bar.dropna() 
+        bars_open.index = pd.to_datetime(bars_open.index)
         return bars_open
         
     def close(self,start = '2000-01-01',end = today):
         bar = pd.DataFrame()
         for x in self.symbol:
             bar[x] = getSymbol(x).adj_history(start = start,end = today)['close']
-        bars_close = bar.dropna()  
+        bars_close = bar.dropna() 
+        bars_close.index = pd.to_datetime(bars_close.index)
         return bars_close
         
     def high(self,start = '2000-01-01',end = today):
         bar = pd.DataFrame()
         for x in self.symbol:
             bar[x] = getSymbol(x).adj_history(start = start,end = today)['high']
-        bars_high = bar.dropna()  
+        bars_high = bar.dropna() 
+        bars_high.index = pd.to_datetime(bars_high.index)
         return bars_high    
         
     def low(self,start = '2000-01-01',end = today):
         bar = pd.DataFrame()
         for x in self.symbol:
             bar[x] = getSymbol(x).adj_history(start = start,end = today)['low']
-        bars_low = bar.dropna()  
+        bars_low = bar.dropna() 
+        bars_low.index = pd.to_datetime(bars_low.index)
         return bars_low  
         
     def volume(self,start = '2000-01-01',end = today):
@@ -123,6 +129,7 @@ class Bars(object):
         for x in self.symbol:
             bar[x] = getSymbol(x).adj_history(start = start,end = today)['volume']
         bars_volume = bar.dropna()  
+        bars_volume.index = pd.to_datetime(bars_volume.index)
         return bars_volume
         
 class MarketOpenPortfolio(Portfolio):
